@@ -5,12 +5,12 @@
 
 工程映射：插件注册中心。
 
-边界：本件为算子骨架 v0——接口先立、实现随进化轮补齐；遵循元法第四条「只增不覆盖」，
+边界：本件为算子 v1——骨架桩已按命名映射补齐实现；遵循元法第四条「只增不覆盖」，
 方法只增不改名不删，行为变更走新版本；凭据不入档，宣称与事实分离。
 """
 
 class Gongshi:
-    """工师（GONGSHI）算子骨架 v0。"""
+    """工师（GONGSHI）算子 v1。"""
 
     ANCHOR = "Ω₀⊂⊙∞⊂Ω｜DID-BR-000002"
     CODE = "GONGSHI"
@@ -18,6 +18,8 @@ class Gongshi:
     def __init__(self, config=None):
         self.config = dict(config or {})
         self.events = []  # 只增不覆盖：会话内事件留痕
+        self.registry = {}
+        self._seq = 0
 
     def describe(self):
         """构件名帖：名、代号、职责、铭文、体系锚。"""
@@ -31,9 +33,15 @@ class Gongshi:
         }
 
     def register(self, plugin):
-        """百工准入：插件登记（骨架桩：实现随进化轮补齐）。"""
-        raise NotImplementedError("GONGSHI.register 骨架桩，候进化轮补齐")
+        """百工准入：插件登记。"""
+        if not self.admit(plugin):
+            raise ValueError("插件不合准入：缺名或缺可调用入口")
+        self._seq += 1
+        pid = "GS-%04d" % self._seq
+        self.registry[pid] = plugin
+        self.events.append({"event": "register", "plugin_id": pid, "name": plugin.get("name")})
+        return pid
 
     def admit(self, plugin):
-        """核验乃收：准入核验（骨架桩：实现随进化轮补齐）。"""
-        raise NotImplementedError("GONGSHI.admit 骨架桩，候进化轮补齐")
+        """核验乃收：准入核验。"""
+        return isinstance(plugin, dict) and bool(plugin.get("name")) and callable(plugin.get("handler"))
