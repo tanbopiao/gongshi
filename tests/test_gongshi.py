@@ -121,3 +121,24 @@ class TestFacade(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRegistryTamperEvidence(unittest.TestCase):
+    """留痕可验证：注册表防篡改＋回归用例。"""
+
+    def test_registry_append_only(self):
+        gate = Gongshi()
+        pid = gate.register(good())
+        before = dict(gate.registry)
+        gate.register(good("良工乙"))
+        after = gate.registry
+        # 只增不覆盖：先前的登记原样保留
+        self.assertEqual(before[pid], after[pid])
+        self.assertEqual(len(before) + 1, len(after))
+
+    def test_regression_admit_unchanged(self):
+        """回归：骨架 admit 行为锁定，防后续改版回归。"""
+        gate = Gongshi()
+        self.assertTrue(gate.admit(good()))
+        self.assertFalse(gate.admit({"name": "无名工"}))
+        self.assertFalse(gate.admit({"handler": lambda: 1}))
